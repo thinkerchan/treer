@@ -15,20 +15,33 @@ program
 let ignoreRegex = null
 
 
-if (program.ignore) {
+let _ignore = program.ignore
+if (_ignore ) {
+	if (typeof _ignore == 'string') {
 
-	//trim program.ignore
-	program.ignore = program.ignore.replace(/^\s*|\s*$/g, '')
+		let dirArr = _ignore.split(',')
+		if (dirArr.length>1) {
+			ignoreRegex = dirArr
+		}else{
 
-	if (/^\/.+\/$/.test(program.ignore)) {
-		program.ignore = program.ignore.replace(/(^\/)|(\/$)/g, '')
-		ignoreRegex = new RegExp(program.ignore, "")
-	} else {
-		//escape special character
-		program.ignore = program.ignore.replace(/[-[\]{}*+?,\\^$|#\s]/g, "\\$&");
-		ignoreRegex = new RegExp("^" + program.ignore + "$", "")
+			//trim program.ignore
+			program.ignore = program.ignore.replace(/^\s*|\s*$/g, '')
+
+			if (/^\/.+\/$/.test(program.ignore)) {
+				program.ignore = program.ignore.replace(/(^\/)|(\/$)/g, '')
+				ignoreRegex = new RegExp(program.ignore, "")
+			} else {
+				//escape special character
+				program.ignore = program.ignore.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+				ignoreRegex = new RegExp("^" + program.ignore + "$", "")
+			}
+		}
+
+		console.log('files in these dir will be ignored:',ignoreRegex)
+
+	}else{
+		console.log('\n The parameter "-i" was invalid and had been ignored!\n')
 	}
-
 }
 
 
@@ -40,11 +53,26 @@ const dirToJson = (path) => {
 	if (stats.isDirectory()) {
 		let dir = fs.readdirSync(path)
 
-		if (ignoreRegex) {
-			dir = dir.filter((val) => {
-				return !ignoreRegex.test(val)
-			})
+		if(ignoreRegex instanceof Array){
+			for (let i = 0; i < ignoreRegex.length; i++) {
+				let one = ignoreRegex[i]
+
+				if (one) {
+					let oneReg = new RegExp("^" + one + "$", "")
+					dir = dir.filter((val) => {
+						return !oneReg.test(val)
+					})
+				}
+			}
+		}else{
+
+			if (ignoreRegex) {
+				dir = dir.filter((val) => {
+					return !ignoreRegex.test(val)
+				})
+			}
 		}
+
 		dir = dir.filter((child) => {
 			let childStats = fs.lstatSync(path + '/' + child)
 			return program.onlyFolder ? childStats.isDirectory() : true
