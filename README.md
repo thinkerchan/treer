@@ -32,6 +32,7 @@ $ treer --help
 
 ```
 $ treer -i "/^regex$/"
+$ treer -i node_modules,.git // new!
 ```
 
 `-e` or `--export` export into file

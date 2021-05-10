@@ -9,13 +9,12 @@ program
 	.option('-d, --directory [dir]', 'Please specify a directory to generate structure tree', process.cwd())
 	.option('-i, --ignore [ig]', 'You can ignore specific directory name')
 	.option('-e, --export [epath]', 'export into file')
-        .option('-f, --only-folder', 'output folder only')
+	.option('-f, --only-folder', 'output folder only')
 	.parse(process.argv);
 
 let ignoreRegex = null
-
-
 let _ignore = program.ignore
+
 if (_ignore ) {
 	if (typeof _ignore == 'string') {
 
